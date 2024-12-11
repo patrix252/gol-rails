@@ -1,0 +1,9 @@
+<h1>Pages#upload</h1>
+<p>upload file</p>
+
+<%= form_for :anything, url: upload_url do |f| %>
+  <%= f.label :board %>
+  <%= f.file_field :board, accept: "text/plain" %>
+
+  <%= f.submit :submit %>
+<% end %>
