@@ -1,0 +1,29 @@
+<div id="<%= dom_id board %>">
+  <p>
+    <strong>Generation:</strong>
+    <%= board.generation %>
+  </p>
+
+  <p>
+    <strong>Rows:</strong>
+    <%= board.rows %>
+  </p>
+
+  <p>
+    <strong>Cols:</strong>
+    <%= board.cols %>
+  </p>
+
+  <p>
+    <strong>Data:</strong>
+    <%= board.data %>
+  </p>
+
+  <p>
+  <strong>State:</strong><br>
+  <% board.data.scan(/.{#{board.cols}}/).each do |row| %>
+    <%= row.gsub("1", "*").gsub("0", ".") %><br>
+  <% end %>
+  </p>
+
+</div>
