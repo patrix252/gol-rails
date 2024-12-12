@@ -13,7 +13,9 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "pages#index"
 
-  resources :boards, only: %i[index show new create destroy]
+  resources :boards, only: %i[index show new create destroy] do
+    get "data", on: :member
+  end
 
   get "new" => "pages#new"
   post "upload" => "pages#upload"

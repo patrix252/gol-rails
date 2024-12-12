@@ -1,7 +1,10 @@
 require "test_helper"
 
 class BoardsControllerTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
+
   setup do
+    sign_in users(:one)
     @board = boards(:one)
   end
 
@@ -17,25 +20,47 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create board" do
     assert_difference("Board.count") do
-      post boards_url, params: { board: { cols: @board.cols, generation: @board.generation, rows: @board.rows, state: @board.state } }
+      post boards_url, params: { board: { grid_file: fixture_file_upload("board_right.txt", "text/plain") } }
     end
 
     assert_redirected_to board_url(Board.last)
   end
 
+  test "should not create board with invalid file" do
+    assert_no_difference("Board.count") do
+      post boards_url, params: { board: { grid_file: fixture_file_upload("board_wrong_gen.txt", "text/plain") } }
+    end
+    assert_response :unprocessable_entity
+
+    assert_no_difference("Board.count") do
+      post boards_url, params: { board: { grid_file: fixture_file_upload("board_wrong_col.txt", "text/plain") } }
+    end
+    assert_response :unprocessable_entity
+
+    assert_no_difference("Board.count") do
+      post boards_url, params: { board: { grid_file: fixture_file_upload("board_wrong_col2.txt", "text/plain") } }
+    end
+    assert_response :unprocessable_entity
+
+    assert_no_difference("Board.count") do
+      post boards_url, params: { board: { grid_file: fixture_file_upload("board_wrong_grid.txt", "text/plain") } }
+    end
+    assert_response :unprocessable_entity
+
+    assert_no_difference("Board.count") do
+      post boards_url, params: { board: { grid_file: fixture_file_upload("board_wrong_grid2.txt", "text/plain") } }
+    end
+    assert_response :unprocessable_entity
+
+    assert_no_difference("Board.count") do
+      post boards_url, params: { board: { grid_file: fixture_file_upload("board_wrong_grid3.txt", "text/plain") } }
+    end
+    assert_response :unprocessable_entity
+  end
+
   test "should show board" do
     get board_url(@board)
     assert_response :success
-  end
-
-  test "should get edit" do
-    get edit_board_url(@board)
-    assert_response :success
-  end
-
-  test "should update board" do
-    patch board_url(@board), params: { board: { cols: @board.cols, generation: @board.generation, rows: @board.rows, state: @board.state } }
-    assert_redirected_to board_url(@board)
   end
 
   test "should destroy board" do
@@ -44,5 +69,30 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to boards_url
+  end
+
+  test "should get data" do
+    get data_board_url(@board)
+    assert_response :success
+    assert_equal "application/octet-stream", response.content_type
+
+    # check right content
+    assert_equal @board.data, response.body.unpack("B*").first
+
+    # test next generation
+    get data_board_url(@board, params: { generation: @board.generation + 1 })
+    assert_response :success
+
+    # test with generation less than board generation
+    get data_board_url(@board, params: { generation: 0 })
+    assert_response :bad_request
+
+    # test with generation equal to board generation
+    get data_board_url(@board, params: { generation: @board.generation })
+    assert_response :success
+
+    # test with generation over the max generation limit
+    get data_board_url(@board, params: { generation: @board.generation + 150 })
+    assert_response :bad_request
   end
 end

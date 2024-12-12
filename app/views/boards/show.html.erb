@@ -2,8 +2,22 @@
 
 <%= render @board %>
 
+<canvas id="board"
+        class="gol-board"
+        data-board-id="<%= @board.id %>"
+        data-cols="<%= @board.cols %>"
+        data-rows="<%= @board.rows %>"
+        data-gen="<%= @board.generation %>"
+></canvas>
+
+<button id="btn-reset">Reset</button>
+<button id="btn-start">Start</button>
+<button id="btn-stop">Stop</button>
+
 <div>
   <%= link_to "Back to boards", boards_path %>
 
   <%= button_to "Destroy this board", @board, method: :delete %>
 </div>
+
+<%= javascript_include_tag "gol" %>

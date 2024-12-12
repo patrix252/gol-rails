@@ -1,12 +1,15 @@
 class BoardsController < ApplicationController
-  before_action :set_board, only: %i[ show destroy ]
+  before_action :authenticate_user!
+  before_action :set_board, only: %i[ show destroy data ]
 
-  # GET /boards or /boards.json
+  MAX_FUTURE_GENERATIONS = 100
+
+  # GET /boards
   def index
     @boards = Board.all
   end
 
-  # GET /boards/1 or /boards/1.json
+  # GET /boards/1
   def show
   end
 
@@ -15,39 +18,59 @@ class BoardsController < ApplicationController
     @board = Board.new
   end
 
-  # POST /boards or /boards.json
+  # POST /boards
   def create
-    data = parse_file(board_params[:grid_file].tempfile)
+    gol = GameOfLife.from_file(board_params[:grid_file].tempfile)
+    @board = gol.to_board
 
-    puts data[:grid]
-
-    @board = Board.new(
-      generation: data[:generation],
-      rows: data[:rows],
-      cols: data[:cols],
-      data: data[:grid],
-      user: current_user
-      )
-
-    respond_to do |format|
-      if @board.save
-        format.html { redirect_to @board, notice: "Board was successfully created." }
-        format.json { render :show, status: :created, location: @board }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @board.errors, status: :unprocessable_entity }
-      end
+    if @board.save
+      redirect_to @board, notice: "Board was successfully created."
+    else
+      render :new, status: :unprocessable_entity
     end
+
+  rescue ArgumentError => e
+      @board = Board.new
+      @board.errors.add(:grid_file, e.message)
+      render :new, status: :unprocessable_entity
   end
 
-  # DELETE /boards/1 or /boards/1.json
+  # DELETE /boards/1
   def destroy
     @board.destroy!
 
     respond_to do |format|
       format.html { redirect_to boards_path, status: :see_other, notice: "Board was successfully destroyed." }
-      format.json { head :no_content }
     end
+  end
+
+  # GET /boards/1/data
+  def data
+    generation = params[:generation].present? ? params[:generation].to_i : @board.generation
+
+    # generation less than board generation
+    if generation < @board.generation
+      head :bad_request
+      return
+    end
+
+    gol_cache = Rails.cache.read("board_#{@board.id}")
+
+    # generation over the max generation limit
+    if (not gol_cache and generation > @board.generation + MAX_FUTURE_GENERATIONS) or
+      (gol_cache and gol_cache.generation > gol_cache.generation + MAX_FUTURE_GENERATIONS)
+      head :bad_request
+      return
+    end
+
+    gol = gol_cache && generation > gol_cache.generation ? gol_cache : GameOfLife.new(board: @board)
+
+    while gol.generation < generation
+      gol.next_generation
+    end
+
+    Rails.cache.write("board_#{@board.id}", gol, expires_in: 1.hour)
+    send_data [ gol.board_data ].pack("B*"), type: "application/octet-stream", disposition: "inline"
   end
 
   private
@@ -60,29 +83,5 @@ class BoardsController < ApplicationController
   # Only allow a list of trusted parameters through.
   def board_params
     params.expect(board: [ :grid_file ])
-  end
-
-  def parse_file(file_path)
-    content = File.read(file_path).lines.map(&:strip)
-    # Validate format
-    return unless content.first.match?(/^Generation \d+:$/)
-    return unless content[1].match?(/^\d+ \d+$/)
-
-    generation = content.first.split.last.to_i
-    dimensions = content[1].split.map(&:to_i)
-    rows, cols = dimensions
-
-    grid = content[2..-1] # Get grid rows
-    return unless grid.size == rows && grid.all? { |line| line.length == cols }
-
-    {
-      generation: generation,
-      rows: rows,
-      cols: cols,
-      grid: grid.flatten.map { |row | row.gsub("*", "1").gsub(".", "0") }.join
-    }
-  rescue StandardError => e
-    Rails.logger.error("File parsing error: #{e.message}")
-    nil
   end
 end
