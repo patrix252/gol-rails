@@ -8,6 +8,7 @@
         data-cols="<%= @board.cols %>"
         data-rows="<%= @board.rows %>"
         data-gen="<%= @board.generation %>"
+        data-session-id="<%= SecureRandom.uuid %>"
 ></canvas>
 
 <button id="btn-reset">Reset</button>

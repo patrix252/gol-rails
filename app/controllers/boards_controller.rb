@@ -47,6 +47,16 @@ class BoardsController < ApplicationController
   # GET /boards/1/data
   def data
     generation = params[:generation].present? ? params[:generation].to_i : @board.generation
+    session_id = params.expect(:session_id)
+
+    # validate session_id
+    uuid_regex = /\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z/i
+    unless uuid_regex.match?(session_id)
+      head :bad_request
+      return
+    end
+
+    cache_key = "board_#{@board.id}_#{session_id}"
 
     # generation less than board generation
     if generation < @board.generation
@@ -54,7 +64,7 @@ class BoardsController < ApplicationController
       return
     end
 
-    gol_cache = Rails.cache.read("board_#{@board.id}")
+    gol_cache = Rails.cache.read(cache_key)
 
     # generation over the max generation limit
     if (not gol_cache and generation > @board.generation + MAX_FUTURE_GENERATIONS) or
@@ -69,7 +79,7 @@ class BoardsController < ApplicationController
       gol.next_generation
     end
 
-    Rails.cache.write("board_#{@board.id}", gol, expires_in: 1.hour)
+    Rails.cache.write(cache_key, gol, expires_in: 1.hour)
     send_data [ gol.board_data ].pack("B*"), type: "application/octet-stream", disposition: "inline"
   end
 

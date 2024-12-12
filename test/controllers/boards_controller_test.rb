@@ -72,27 +72,32 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get data" do
-    get data_board_url(@board)
+    get data_board_url(@board, params: { session_id: SecureRandom.uuid })
     assert_response :success
     assert_equal "application/octet-stream", response.content_type
-
-    # check right content
     assert_equal @board.data, response.body.unpack("B*").first
 
+    # check valid session_id
+    get data_board_url(@board, params: { session_id: SecureRandom.uuid })
+    assert_response :success
+
+    get data_board_url(@board, params: {})
+    assert_response :bad_request
+
     # test next generation
-    get data_board_url(@board, params: { generation: @board.generation + 1 })
+    get data_board_url(@board, params: { generation: @board.generation + 1, session_id: SecureRandom.uuid })
     assert_response :success
 
     # test with generation less than board generation
-    get data_board_url(@board, params: { generation: 0 })
+    get data_board_url(@board, params: { generation: 0, session_id: SecureRandom.uuid })
     assert_response :bad_request
 
     # test with generation equal to board generation
-    get data_board_url(@board, params: { generation: @board.generation })
+    get data_board_url(@board, params: { generation: @board.generation, session_id: SecureRandom.uuid })
     assert_response :success
 
     # test with generation over the max generation limit
-    get data_board_url(@board, params: { generation: @board.generation + 150 })
+    get data_board_url(@board, params: { generation: @board.generation + 150, session_id: SecureRandom.uuid })
     assert_response :bad_request
   end
 end

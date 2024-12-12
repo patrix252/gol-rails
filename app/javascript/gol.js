@@ -8,6 +8,7 @@ class GameOfLife {
     this.rows = parseInt(this.canvas.dataset.rows);
     this.generationInit = parseInt(this.canvas.dataset.gen);
     this.generation = parseInt(this.canvas.dataset.gen);
+    this.sessionId = this.canvas.dataset.sessionId;
     this.playInterval = null;
 
     this.ctx = this.canvas.getContext('2d');
@@ -88,7 +89,8 @@ class GameOfLife {
   async getBoard(generation) {
 
     try {
-      const resp = await fetch(`/boards/${this.boardId}/data?${new URLSearchParams({generation: generation})}`);
+      const resp = await fetch(`/boards/${this.boardId}/data?${new URLSearchParams(
+        {generation: generation, session_id: this.sessionId})}`);
 
       if (!resp.ok) {
         throw new Error(`Error fetching board data: ${resp.statusText}`);
