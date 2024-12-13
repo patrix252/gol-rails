@@ -29,6 +29,7 @@
         <div>
           <h3 class="float-md-start mb-0"><a href="/" style="text-decoration: none; color: white">Game of life</a></h3>
           <nav class="nav nav-masthead justify-content-center float-md-end">
+            <%= button_to "Logout", destroy_user_session_path, class: "nav-link fw-bold py-1 px-0", method: :delete if user_signed_in? %>
           </nav>
         </div>
       </header>
