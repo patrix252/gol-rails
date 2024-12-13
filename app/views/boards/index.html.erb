@@ -1,16 +1,15 @@
-<p style="color: green"><%= notice %></p>
-
 <% content_for :title, "Boards" %>
 
-<h1>Boards</h1>
+<h1>Boards <%= link_to "New board", new_board_path, class: "btn btn-light fw-bold" %></h1>
 
-<div id="boards">
+<div id="boards" class="mt-5">
   <% @boards.each do |board| %>
-    <%= render board %>
-    <p>
-      <%= link_to "Show this board", board %>
-    </p>
+    <div class="mb-3">
+        <%= render board %>
+        <div class="mt-1">
+          <%= link_to "Show this board", board, class: "btn btn-outline-light fw-bold" %>
+        </div>
+    </div>
   <% end %>
 </div>
 
-<%= link_to "New board", new_board_path %>

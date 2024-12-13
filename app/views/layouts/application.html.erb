@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="h-100" data-bs-theme="dark" lang="en">
   <head>
     <title><%= content_for(:title) || "Gol Rails" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -18,12 +18,39 @@
     <%= stylesheet_link_tag :app %>
     <%= javascript_importmap_tags %>
     <%= stylesheet_link_tag "application" %>
+    <%= stylesheet_link_tag "cover" %>
+
+    <meta name="theme-color" content="#712cf9">
   </head>
+  <body class="d-flex h-100 text-center text-bg-dark">
 
-  <body>
+    <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+      <header class="mb-auto">
+        <div>
+          <h3 class="float-md-start mb-0"><a href="/" style="text-decoration: none; color: white">Game of life</a></h3>
+          <nav class="nav nav-masthead justify-content-center float-md-end">
+          </nav>
+        </div>
+      </header>
 
-    <p class="notice"><%= notice %></p>
-    <p class="alert"><%= alert %></p>
-    <%= yield %>
+      <% flash.each do |name, msg| %>
+        <% if msg.is_a?(String) %>
+          <div class="alert alert-<%= name.to_s == 'notice' ? 'success' : 'danger' %>">
+            <%= content_tag :div, msg, :id => "flash_#{name}" %>
+          </div>
+        <% end %>
+      <% end %>
+
+      <main class="px-3">
+
+        <%= yield %>
+
+      </main>
+
+      <footer class="mt-auto text-white-50">
+        <p>Game of life made by <a href="https://patrix252.dev" class="text-white">@patrix252</a>.</p>
+      </footer>
+    </div>
+
   </body>
 </html>

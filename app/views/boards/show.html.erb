@@ -1,24 +1,28 @@
-<p style="color: green"><%= notice %></p>
-
 <%= render @board %>
 
-<canvas id="board"
-        class="gol-board"
-        data-board-id="<%= @board.id %>"
-        data-cols="<%= @board.cols %>"
-        data-rows="<%= @board.rows %>"
-        data-gen="<%= @board.generation %>"
-        data-session-id="<%= SecureRandom.uuid %>"
-></canvas>
+<div class="mt-5 mb-5">
+  <canvas id="board"
+          class="gol-board"
+          data-board-id="<%= @board.id %>"
+          data-cols="<%= @board.cols %>"
+          data-rows="<%= @board.rows %>"
+          data-gen="<%= @board.generation %>"
+          data-session-id="<%= SecureRandom.uuid %>"
+  ></canvas>
+</div>
 
-<button id="btn-reset">Reset</button>
-<button id="btn-start">Start</button>
-<button id="btn-stop">Stop</button>
+<div class="mb-5">
+  <button id="btn-reset" class="btn btn-outline-light fw-bold" style="margin-right: 10px">Reset</button>
+  <button id="btn-start" class="btn btn-light fw-bold border-white bg-white">Start</button>
+  <button id="btn-stop" class="btn btn-light fw-bold border-white bg-white">Stop</button>
+</div>
+
 
 <div>
   <%= link_to "Back to boards", boards_path %>
-
-  <%= button_to "Destroy this board", @board, method: :delete %>
+</div>
+<div class="mt-5">
+  <%= button_to "Destroy this board", @board, method: :delete, class: "btn btn-danger fw-bold " %>
 </div>
 
 <%= javascript_include_tag "gol" %>

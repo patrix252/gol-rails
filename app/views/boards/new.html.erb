@@ -1,9 +1,23 @@
 <% content_for :title, "New board" %>
 
-<h1>New board</h1>
+<h1 class="mb-2">Create a new board</h1>
+<div class="mb-5">
+  <p>Upload a board file like the example below:</p>
+  <code>
+    Generation 3:<br/>
+    4 8<br/>
+    ........<br/>
+    ........<br/>
+    ..***...<br/>
+    ........<br/>
+  </code>
+</div>
+
+
 
 <%= render "file_form", board: @board %>
 
+<br>
 <br>
 
 <div>

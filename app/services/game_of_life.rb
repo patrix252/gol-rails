@@ -41,7 +41,15 @@ class GameOfLife
 
   # create static method to create a new game of life from a file
   def self.from_file(file_path)
-    content = File.read(file_path).lines.map(&:strip)
+    if file_path.nil? || !File.exist?(file_path)
+      raise ArgumentError, "Invalid file path"
+    end
+
+    begin
+      content = File.read(file_path).lines.map(&:strip)
+    rescue Exception
+      raise ArgumentError, "Invalid file format"
+    end
 
     unless content.size >= 3
       raise ArgumentError, "Invalid file format: must have at least 3 lines"

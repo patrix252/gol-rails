@@ -1,13 +1,14 @@
 class GameOfLife {
   CELL_SIZE = 10;
 
-  constructor(canvasId, resetButtonId, startButtonId, stopButtonId) {
+  constructor(canvasId, resetButtonId, startButtonId, stopButtonId, generationFieldId) {
     this.canvas = document.getElementById(canvasId);
     this.boardId = this.canvas.dataset.boardId;
     this.cols = parseInt(this.canvas.dataset.cols);
     this.rows = parseInt(this.canvas.dataset.rows);
     this.generationInit = parseInt(this.canvas.dataset.gen);
     this.generation = parseInt(this.canvas.dataset.gen);
+    this.generationField = document.getElementById(generationFieldId);
     this.sessionId = this.canvas.dataset.sessionId;
     this.playInterval = null;
 
@@ -31,6 +32,9 @@ class GameOfLife {
       this.stop();
     })
 
+    this.disablePlayButton(false);
+    this.disableStopButton(true);
+
     this.getBoard(this.generation).then(board => {
       this.drawBoard(board);
     }).catch(err => {
@@ -39,6 +43,9 @@ class GameOfLife {
   }
 
   play() {
+    this.disablePlayButton(true);
+    this.disableStopButton(false);
+
     if (this.playInterval) return;
 
     this.playInterval = setInterval(async () => {
@@ -47,6 +54,9 @@ class GameOfLife {
   }
 
   stop() {
+    this.disablePlayButton(false);
+    this.disableStopButton(true);
+
     if (this.playInterval) {
       clearInterval(this.playInterval);
       this.playInterval = null;
@@ -58,17 +68,30 @@ class GameOfLife {
 
     const board = await this.getBoard(this.generationInit);
     this.drawBoard(board);
+    this.updateGeneration(this.generationInit);
   }
 
   async drawNextGeneration() {
-    this.generation += 1;
+    this.updateGeneration(this.generation + 1);
 
     const board = await this.getBoard(this.generation);
     this.drawBoard(board);
 
-    this.canvas.dataset.gen = this.generation.toString();
   }
 
+  disablePlayButton(value) {
+    this.startButton.disabled = value;
+  }
+
+  disableStopButton(value) {
+    this.stopButton.disabled = value;
+  }
+
+  updateGeneration(generation) {
+    this.generation = generation;
+    this.generationField.value = generation;
+    this.canvas.dataset.gen = this.generation.toString();
+  }
 
   drawBoard(board) {
     // Loop through the grid and draw each cell
@@ -86,6 +109,7 @@ class GameOfLife {
       }
     }
   }
+
   async getBoard(generation) {
 
     try {
@@ -126,5 +150,5 @@ class GameOfLife {
 }
 
 document.addEventListener("DOMContentLoaded", async (event) => {
-  new GameOfLife('board', 'btn-reset', 'btn-start', 'btn-stop');
+  new GameOfLife('board', 'btn-reset', 'btn-start', 'btn-stop', 'generation');
 });

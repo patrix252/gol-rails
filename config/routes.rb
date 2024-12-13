@@ -16,5 +16,4 @@ Rails.application.routes.draw do
   resources :boards, only: %i[index show new create destroy] do
     get "data", on: :member
   end
-
 end

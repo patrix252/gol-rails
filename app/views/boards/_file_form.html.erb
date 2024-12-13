@@ -1,8 +1,6 @@
 <%= form_for :board, url: boards_path do |form| %>
   <% if board.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(board.errors.count, "error") %> prohibited this board from being saved:</h2>
-
+    <div class="alert alert-danger"><%= pluralize(board.errors.count, "error") %> has been found:
       <ul>
         <% board.errors.each do |error| %>
           <li><%= error.full_message %></li>
@@ -11,12 +9,11 @@
     </div>
   <% end %>
 
-  <div>
-    <%= form.label :grid_file, style: "display: block" %>
-    <%= form.file_field :grid_file, accept: "text/plain" %>
+  <div class="mb-2">
+    <%= form.file_field :grid_file, accept: "text/plain", required: true %>
   </div>
 
   <div>
-    <%= form.submit %>
+    <%= form.submit class: "btn btn-light fw-bold border-white " %>
   </div>
 <% end %>
