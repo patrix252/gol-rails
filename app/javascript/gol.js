@@ -72,11 +72,15 @@ class GameOfLife {
   }
 
   async drawNextGeneration() {
-    this.updateGeneration(this.generation + 1);
+    try {
+      const board = await this.getBoard(this.generation);
+      this.updateGeneration(this.generation + 1);
 
-    const board = await this.getBoard(this.generation);
-    this.drawBoard(board);
-
+      this.drawBoard(board);
+    } catch (error) {
+      alert(error);
+      this.stop();
+    }
   }
 
   disablePlayButton(value) {
