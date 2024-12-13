@@ -17,7 +17,4 @@ Rails.application.routes.draw do
     get "data", on: :member
   end
 
-  get "new" => "pages#new"
-  post "upload" => "pages#upload"
-  get "play" => "pages#play"
 end
